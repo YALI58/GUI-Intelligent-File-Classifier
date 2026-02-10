@@ -1,0 +1,7 @@
+watchdog>=3.0.0
+pathlib2>=2.3.7; python_version < '3.4'
+pillow>=9.0.0
+send2trash>=1.8.0
+pyinstaller>=5.0.0 
+requests>=2.31.0
+keyring>=24.0.0

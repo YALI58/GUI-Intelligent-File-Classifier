@@ -1,0 +1,156 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Add necessary permissions
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+      - name: Build executable
+        run: |
+          pyinstaller --name="IntelligentFileClassifier" --onefile --windowed --clean --add-data="README.md;." --add-data="USER_GUIDE.md;." main.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: dist/IntelligentFileClassifier.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+      - name: Build executable
+        run: |
+          pyinstaller --name="IntelligentFileClassifier" --onefile --clean --add-data="README.md:." --add-data="USER_GUIDE.md:." main.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-executable
+          path: dist/IntelligentFileClassifier
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+      - name: Build executable
+        run: |
+          pyinstaller --name="IntelligentFileClassifier" --onefile --windowed --clean --add-data="README.md:." --add-data="USER_GUIDE.md:." main.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-executable
+          path: dist/IntelligentFileClassifier
+
+  create-release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-executable
+          path: windows
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-executable
+          path: linux
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-executable
+          path: macos
+      - name: Verify artifacts
+        run: |
+          echo "Verifying downloaded artifacts..."
+          ls -la windows/
+          ls -la linux/
+          ls -la macos/
+          find . -name "IntelligentFileClassifier*"
+      - name: Move files to release directory
+        run: |
+          mkdir -p release
+          cp windows/IntelligentFileClassifier.exe release/IntelligentFileClassifier-windows.exe
+          cp linux/IntelligentFileClassifier release/IntelligentFileClassifier-linux
+          cp macos/IntelligentFileClassifier release/IntelligentFileClassifier-macos
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Intelligent File Classifier ${{ github.ref_name }}
+          body: |
+            # Intelligent File Classifier ${{ github.ref_name }}
+            
+            ## 🚀 New Release
+            
+            ### 📥 Download Links
+            - **Windows Version**: [IntelligentFileClassifier-windows.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/IntelligentFileClassifier-windows.exe)
+            - **Linux Version**: [IntelligentFileClassifier-linux](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/IntelligentFileClassifier-linux)
+            - **macOS Version**: [IntelligentFileClassifier-macos](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/IntelligentFileClassifier-macos)
+            
+            ### 📖 Installation Instructions
+            1. Download the executable file for your operating system
+            2. **Windows**: Double-click to run directly
+            3. **Linux/macOS**: Add execute permission and run
+               ```bash
+               chmod +x IntelligentFileClassifier-linux
+               ./IntelligentFileClassifier-linux
+               ```
+            
+            ### 📚 User Guide
+            - For detailed usage instructions, see [Complete User Guide](https://github.com/${{ github.repository }}/blob/main/USER_GUIDE.md)
+            - Project homepage: [README](https://github.com/${{ github.repository }}/blob/main/README.md)
+            
+            ### ✨ Key Features
+            - 🤖 Intelligent file classification
+            - 🔗 File association detection
+            - 📊 Multi-level classification
+            - 🔄 Real-time monitoring
+            - 🤖 Smart recommendation system
+            - ↩️ Undo operations
+          draft: false
+          prerelease: false
+          files: |
+            release/IntelligentFileClassifier-windows.exe
+            release/IntelligentFileClassifier-linux
+            release/IntelligentFileClassifier-macos
