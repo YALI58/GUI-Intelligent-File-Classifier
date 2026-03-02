@@ -355,6 +355,14 @@ class ConfigManager:
         """导出配置到指定路径"""
         try:
             config = self.load_config()
+
+            try:
+                config = dict(config)
+                for k in ["source_path", "target_path", "recent_sources", "recent_targets"]:
+                    if k in config:
+                        config[k] = "" if k in {"source_path", "target_path"} else []
+            except Exception:
+                pass
             export_file = Path(export_path)
             
             # 确保目录存在
