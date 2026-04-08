@@ -1,10 +1,10 @@
+```python
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -16,45 +16,44 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-build/
-dist/
+# Testing
+.coverage
+htmlcov/
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
 
-# Environments
+# Environment
 .env
 .venv
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
+.env.bak
+.env.local
+.env.*
 
 # IDE
-.idea/
 .vscode/
-*.log
+.idea/
+*.swp
+*.swo
+*.tmp
 
-# Local files
-删除文件夹/
-release/
-backup_files/
-resources/
-
-# OS generated files
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# App local config (do not commit)
-.file_classifier_config.json
-.file_classifier_ai/
+# Logs
+*.log
+
+# Coverage
+coverage/
+```
